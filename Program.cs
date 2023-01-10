@@ -8,14 +8,14 @@ namespace @Text_Mining
     public static class Program
     {
         private static readonly string[] menu =
-            { "Number of text files containing a certain word"
-            , ""
-            , ""
-            , ""
-            , ""
-            , ""
-            , ""
-            , ""};
+            { "Number of pages containing a word"
+            , "Number of pages with a main genre"
+            , "Number of pages with simple-adjacency with a page"
+            , "Number of pages with adjacency with a page"
+            , "Number of pages with complete-adjacency with a page"
+            , "Books with a genre"
+            , "Books with a genre containing a word"
+            , "Books with complete-adjacency"};
 
         private const string data_address = @"";
 
@@ -36,7 +36,7 @@ namespace @Text_Mining
                 }
                 finally
                 {
-                    System.Threading.Thread.Sleep(2000);
+                    for (ConsoleKey inputKey = Console.ReadKey().Key; inputKey != ConsoleKey.Spacebar && inputKey != ConsoleKey.Enter; inputKey = Console.ReadKey().Key) ;
                     Console.Clear();
                 }
             }
@@ -81,56 +81,80 @@ namespace @Text_Mining
         {
             Stopwatch watch = Stopwatch.StartNew();
             watch.Stop();
+            "Time: ".Show(ConsoleColor.DarkBlue, false);
             $"{watch.Elapsed.ToString()[6..]}s".Show(ConsoleColor.DarkCyan);
+            "Space: ".Show(ConsoleColor.DarkBlue, false);
+            $"mb".Show(ConsoleColor.DarkCyan);
         }
 
         private static void Function2()
         {
             Stopwatch watch = Stopwatch.StartNew();
             watch.Stop();
+            "Time: ".Show(ConsoleColor.DarkBlue, false);
             $"{watch.Elapsed.ToString()[6..]}s".Show(ConsoleColor.DarkCyan);
+            "Space: ".Show(ConsoleColor.DarkBlue, false);
+            $"mb".Show(ConsoleColor.DarkCyan);
         }
 
         private static void Function3()
         {
             Stopwatch watch = Stopwatch.StartNew();
             watch.Stop();
+            "Time: ".Show(ConsoleColor.DarkBlue, false);
             $"{watch.Elapsed.ToString()[6..]}s".Show(ConsoleColor.DarkCyan);
+            "Space: ".Show(ConsoleColor.DarkBlue, false);
+            $"mb".Show(ConsoleColor.DarkCyan);
         }
 
         private static void Function4()
         {
             Stopwatch watch = Stopwatch.StartNew();
             watch.Stop();
+            "Time: ".Show(ConsoleColor.DarkBlue, false);
             $"{watch.Elapsed.ToString()[6..]}s".Show(ConsoleColor.DarkCyan);
+            "Space: ".Show(ConsoleColor.DarkBlue, false);
+            $"mb".Show(ConsoleColor.DarkCyan);
         }
 
         private static void Function5()
         {
             Stopwatch watch = Stopwatch.StartNew();
             watch.Stop();
+            "Time: ".Show(ConsoleColor.DarkBlue, false);
             $"{watch.Elapsed.ToString()[6..]}s".Show(ConsoleColor.DarkCyan);
+            "Space: ".Show(ConsoleColor.DarkBlue, false);
+            $"mb".Show(ConsoleColor.DarkCyan);
         }
 
         private static void Function6()
         {
             Stopwatch watch = Stopwatch.StartNew();
             watch.Stop();
-            $"{watch.Elapsed.ToString()[6..]} s".Show(ConsoleColor.DarkCyan);
+            "Time: ".Show(ConsoleColor.DarkBlue, false);
+            $"{watch.Elapsed.ToString()[6..]}s".Show(ConsoleColor.DarkCyan);
+            "Space: ".Show(ConsoleColor.DarkBlue, false);
+            $"mb".Show(ConsoleColor.DarkCyan);
         }
 
         private static void Function7()
         {
             Stopwatch watch = Stopwatch.StartNew();
             watch.Stop();
-            $"{watch.Elapsed.ToString()[6..]} s".Show(ConsoleColor.DarkCyan);
+            "Time: ".Show(ConsoleColor.DarkBlue, false);
+            $"{watch.Elapsed.ToString()[6..]}s".Show(ConsoleColor.DarkCyan);
+            "Space: ".Show(ConsoleColor.DarkBlue, false);
+            $"mb".Show(ConsoleColor.DarkCyan);
         }
 
         private static void Function8()
         {
             Stopwatch watch = Stopwatch.StartNew();
             watch.Stop();
-            $"{watch.Elapsed.ToString()[6..]} s".Show(ConsoleColor.DarkCyan);
+            "Time: ".Show(ConsoleColor.DarkBlue, false);
+            $"{watch.Elapsed.ToString()[6..]}s".Show(ConsoleColor.DarkCyan);
+            "Space: ".Show(ConsoleColor.DarkBlue, false);
+            $"mb".Show(ConsoleColor.DarkCyan);
         }
 
         private static void Welcome()
