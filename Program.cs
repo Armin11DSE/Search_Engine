@@ -1,11 +1,12 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Timers;
 
 namespace @Text_Mining
 {
     public static class Program
     {
-        private static string[] menu =
+        private static readonly string[] menu =
             { ""
             , ""
             , ""
@@ -17,28 +18,22 @@ namespace @Text_Mining
 
         public static void Main()
         {
+            Welcome();
             while (true)
             {
                 try
                 {
-                    Run();
+                    menu.Show(ConsoleColor.DarkYellow);
+                    CallFunction(Get.Int(new Range(0, menu.Length)));
                 }
                 catch (Exception ex)
                 {
                     Console.WriteLine(ex.Message);
                     "Program has crashed!\nRebooting...".Show(ConsoleColor.DarkRed);
-
+                    System.Threading.Thread.Sleep(2000);
                     Console.Clear();
+                    Welcome();
                 }
-            }
-        }
-
-        private static void Run()
-        {
-            while (true)
-            {
-                menu.Show(ConsoleColor.DarkYellow);
-                CallFunction(Get.Int(new range(0, menu.Length)));
             }
         }
 
@@ -79,56 +74,75 @@ namespace @Text_Mining
 
         private static void TSI_Count()
         {
-
+            Stopwatch watch = Stopwatch.StartNew();
+            watch.Stop();
+            $"{watch.ElapsedMilliseconds}ms".Show(ConsoleColor.DarkCyan);
         }
 
         private static void Function2()
         {
-
+            Stopwatch watch = Stopwatch.StartNew();
+            watch.Stop();
+            $"{watch.ElapsedMilliseconds}ms".Show(ConsoleColor.DarkCyan);
         }
 
         private static void Function3()
         {
-
+            Stopwatch watch = Stopwatch.StartNew();
+            watch.Stop();
+            $"{watch.ElapsedMilliseconds}ms".Show(ConsoleColor.DarkCyan);
         }
 
         private static void Function4()
         {
-
+            Stopwatch watch = Stopwatch.StartNew();
+            watch.Stop();
+            $"{watch.ElapsedMilliseconds}ms".Show(ConsoleColor.DarkCyan);
         }
 
         private static void Function5()
         {
-
+            Stopwatch watch = Stopwatch.StartNew();
+            watch.Stop();
+            $"{watch.ElapsedMilliseconds}ms".Show(ConsoleColor.DarkCyan);
         }
 
         private static void Function6()
         {
-
+            Stopwatch watch = Stopwatch.StartNew();
+            watch.Stop();
+            $"{watch.ElapsedMilliseconds}ms".Show(ConsoleColor.DarkCyan);
         }
 
         private static void Function7()
         {
-
+            Stopwatch watch = Stopwatch.StartNew();
+            watch.Stop();
+            $"{watch.ElapsedMilliseconds}ms".Show(ConsoleColor.DarkCyan);
         }
 
         private static void Function8()
         {
+            Stopwatch watch = Stopwatch.StartNew();
+            watch.Stop();
+            $"{watch.ElapsedMilliseconds}ms".Show(ConsoleColor.DarkCyan);
+        }
 
+        private static void Welcome()
+        {
+            string welcomeMessage = "Welcome To Text Mining";
+            Console.ForegroundColor = ConsoleColor.Magenta;
+            Console.WriteLine(String.Format("{0," + ((Console.WindowWidth / 2) + (welcomeMessage.Length / 2)) + "}", welcomeMessage));
+            Console.ResetColor();
         }
 
         private static void Terminate()
             => "Thank you for using our program".Show(ConsoleColor.Green);
-
-        private static void CallTimer()
-        {
-
-        }
     }
 
     public static class Get
     {
-        public static int Int(range range)
+        public static int Int(Range range)
         {
             int int_input;
             while (!int.TryParse(Console.ReadLine(), out int_input) || int_input < range.min || int_input > range.max)
@@ -145,12 +159,12 @@ namespace @Text_Mining
         }
     }
 
-    public struct range
+    public readonly struct Range
     {
         public readonly int min;
         public readonly int max;
 
-        public range(int min, int max)
+        public Range(int min, int max)
         {
             this.min = min;
             this.max = max;
