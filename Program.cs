@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Timers;
+using System.IO;
 
 namespace @Text_Mining
 {
     public static class Program
     {
         private static readonly string[] menu =
-            { ""
+            { "Number of text files containing a certain word"
             , ""
             , ""
             , ""
@@ -16,23 +17,27 @@ namespace @Text_Mining
             , ""
             , ""};
 
+        private const string data_address = @"";
+
         public static void Main()
         {
-            Welcome();
             while (true)
             {
+                Welcome();
                 try
                 {
                     menu.Show(ConsoleColor.DarkYellow);
-                    CallFunction(Get.Int(new Range(0, menu.Length)));
+                    CallFunction(Get.Int(new Range(0, menu.Length), "Option: ", ConsoleColor.DarkCyan));
                 }
                 catch (Exception ex)
                 {
                     Console.WriteLine(ex.Message);
                     "Program has crashed!\nRebooting...".Show(ConsoleColor.DarkRed);
+                }
+                finally
+                {
                     System.Threading.Thread.Sleep(2000);
                     Console.Clear();
-                    Welcome();
                 }
             }
         }
@@ -42,7 +47,7 @@ namespace @Text_Mining
             switch (option)
             {
                 case 1:
-                    TSI_Count();
+                    TextsContatining(Get.String("word: ", ConsoleColor.DarkCyan), Get.Int(new Range(1), "number of repetitions: ", ConsoleColor.DarkCyan));
                     break;
                 case 2:
                     Function2();
@@ -72,60 +77,60 @@ namespace @Text_Mining
             }
         }
 
-        private static void TSI_Count()
+        private static void TextsContatining(string word, int repetitionNum)
         {
             Stopwatch watch = Stopwatch.StartNew();
             watch.Stop();
-            $"{watch.ElapsedMilliseconds}ms".Show(ConsoleColor.DarkCyan);
+            $"{watch.Elapsed.ToString()[6..]}s".Show(ConsoleColor.DarkCyan);
         }
 
         private static void Function2()
         {
             Stopwatch watch = Stopwatch.StartNew();
             watch.Stop();
-            $"{watch.ElapsedMilliseconds}ms".Show(ConsoleColor.DarkCyan);
+            $"{watch.Elapsed.ToString()[6..]}s".Show(ConsoleColor.DarkCyan);
         }
 
         private static void Function3()
         {
             Stopwatch watch = Stopwatch.StartNew();
             watch.Stop();
-            $"{watch.ElapsedMilliseconds}ms".Show(ConsoleColor.DarkCyan);
+            $"{watch.Elapsed.ToString()[6..]}s".Show(ConsoleColor.DarkCyan);
         }
 
         private static void Function4()
         {
             Stopwatch watch = Stopwatch.StartNew();
             watch.Stop();
-            $"{watch.ElapsedMilliseconds}ms".Show(ConsoleColor.DarkCyan);
+            $"{watch.Elapsed.ToString()[6..]}s".Show(ConsoleColor.DarkCyan);
         }
 
         private static void Function5()
         {
             Stopwatch watch = Stopwatch.StartNew();
             watch.Stop();
-            $"{watch.ElapsedMilliseconds}ms".Show(ConsoleColor.DarkCyan);
+            $"{watch.Elapsed.ToString()[6..]}s".Show(ConsoleColor.DarkCyan);
         }
 
         private static void Function6()
         {
             Stopwatch watch = Stopwatch.StartNew();
             watch.Stop();
-            $"{watch.ElapsedMilliseconds}ms".Show(ConsoleColor.DarkCyan);
+            $"{watch.Elapsed.ToString()[6..]} s".Show(ConsoleColor.DarkCyan);
         }
 
         private static void Function7()
         {
             Stopwatch watch = Stopwatch.StartNew();
             watch.Stop();
-            $"{watch.ElapsedMilliseconds}ms".Show(ConsoleColor.DarkCyan);
+            $"{watch.Elapsed.ToString()[6..]} s".Show(ConsoleColor.DarkCyan);
         }
 
         private static void Function8()
         {
             Stopwatch watch = Stopwatch.StartNew();
             watch.Stop();
-            $"{watch.ElapsedMilliseconds}ms".Show(ConsoleColor.DarkCyan);
+            $"{watch.Elapsed.ToString()[6..]} s".Show(ConsoleColor.DarkCyan);
         }
 
         private static void Welcome()
@@ -137,24 +142,32 @@ namespace @Text_Mining
         }
 
         private static void Terminate()
-            => "Thank you for using our program".Show(ConsoleColor.Green);
+            => "Thank you for using our program".Show(ConsoleColor.Magenta);
     }
 
     public static class Get
     {
-        public static int Int(Range range)
+        public static int Int(Range range, string message = "", ConsoleColor messageColor = ConsoleColor.White)
         {
             int int_input;
+            message.Show(messageColor, false);
             while (!int.TryParse(Console.ReadLine(), out int_input) || int_input < range.min || int_input > range.max)
-                $"Input must be a number between {range.min} and {range.max}!".Show(ConsoleColor.Red);
+            {
+                $"Input must be a number between {range.min} and {range.max}.\n".Show(ConsoleColor.Red);
+                message.Show(messageColor, false);
+            }
             return int_input;
         }
 
-        public static string String()
+        public static string String(string message = "", ConsoleColor messageColor = ConsoleColor.White)
         {
             string? string_input;
+            message.Show(messageColor, false);
             while ((string_input = Console.ReadLine()) == null)
-                "No word was inputed!".Show(ConsoleColor.Red);
+            {
+                "No word was inputed.\n".Show(ConsoleColor.Red);
+                message.Show(messageColor, false);
+            }
             return string_input;
         }
     }
@@ -169,22 +182,31 @@ namespace @Text_Mining
             this.min = min;
             this.max = max;
         }
+
+        public Range(int min)
+        {
+            this.min = min;
+            this.max = int.MaxValue;
+        }
     }
 
     public static class Extensions
     {
-        public static void Show(this string message, ConsoleColor color)
+        public static void Show(this string message, ConsoleColor color = ConsoleColor.White, bool inLine = true)
         {
             Console.ForegroundColor = color;
-            Console.WriteLine(message + '\n');
+            if (inLine)
+                Console.WriteLine(message);
+            else
+                Console.Write(message);
             Console.ResetColor();
         }
 
-        public static void Show(this string[] menu, ConsoleColor color)
+        public static void Show(this string[] menu, ConsoleColor color = ConsoleColor.White)
         {
             Console.ForegroundColor = color;
             for (int i = 0; i < menu.Length; i++)
-                Console.WriteLine($"{i + 1}. {menu[i]}");
+                Console.WriteLine($"{i + 1}.{menu[i]}");
             Console.WriteLine();
             Console.ResetColor();
         }
