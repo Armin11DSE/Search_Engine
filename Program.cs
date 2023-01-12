@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.Timers;
 using System.IO;
 
-namespace @Text_Mining
+namespace @SearchEngine
 {
     public static class Program
     {
@@ -17,26 +17,27 @@ namespace @Text_Mining
             , "Books with a genre containing a word"
             , "Books with complete-adjacency"};
 
-        private const string data_address = @"";
+
 
         public static void Main()
         {
             while (true)
             {
-                Welcome();
+                AppIntro();
                 try
                 {
                     menu.Show(ConsoleColor.DarkYellow);
                     CallFunction(Get.Int(new Range(0, menu.Length), "Option: ", ConsoleColor.DarkCyan));
+                    for (ConsoleKey inputKey = Console.ReadKey(true).Key; inputKey != ConsoleKey.Spacebar && inputKey != ConsoleKey.Enter; inputKey = Console.ReadKey(true).Key) ;
                 }
                 catch (Exception ex)
                 {
                     Console.WriteLine(ex.Message);
                     "Program has crashed!\nRebooting...".Show(ConsoleColor.DarkRed);
+                    System.Threading.Tasks.Task.Delay(2000);
                 }
                 finally
                 {
-                    for (ConsoleKey inputKey = Console.ReadKey().Key; inputKey != ConsoleKey.Spacebar && inputKey != ConsoleKey.Enter; inputKey = Console.ReadKey().Key) ;
                     Console.Clear();
                 }
             }
@@ -47,10 +48,10 @@ namespace @Text_Mining
             switch (option)
             {
                 case 1:
-                    TextsContatining(Get.String("word: ", ConsoleColor.DarkCyan), Get.Int(new Range(1), "number of repetitions: ", ConsoleColor.DarkCyan));
+                    PagesContaining(Get.String("word: ", ConsoleColor.DarkCyan), Get.Int(new Range(1), "number of repetitions: ", ConsoleColor.DarkCyan));
                     break;
                 case 2:
-                    Function2();
+                    PagesContaining(Get.String("genre: ", ConsoleColor.DarkCyan));
                     break;
                 case 3:
                     Function3();
@@ -77,89 +78,121 @@ namespace @Text_Mining
             }
         }
 
-        private static void TextsContatining(string word, int repetitionNum)
+        private static void PagesContaining(string word, int repetitionNum)
         {
             Stopwatch watch = Stopwatch.StartNew();
+            double allocated = GC.GetTotalMemory(false);
+
+
+
             watch.Stop();
             "Time: ".Show(ConsoleColor.DarkBlue, false);
-            $"{watch.Elapsed.ToString()[6..]}s".Show(ConsoleColor.DarkCyan);
+            $"{watch.Elapsed.ToString()[6..11]}s".Show(ConsoleColor.DarkCyan);
             "Space: ".Show(ConsoleColor.DarkBlue, false);
-            $"mb".Show(ConsoleColor.DarkCyan);
+            $"{(GC.GetTotalMemory(false) - allocated).InMegaBytes()}mb".Show(ConsoleColor.DarkCyan);
         }
 
-        private static void Function2()
+        private static void PagesContaining(string genre)
         {
             Stopwatch watch = Stopwatch.StartNew();
+            double allocated = GC.GetTotalMemory(false);
+
+
+
             watch.Stop();
             "Time: ".Show(ConsoleColor.DarkBlue, false);
-            $"{watch.Elapsed.ToString()[6..]}s".Show(ConsoleColor.DarkCyan);
+            $"{watch.Elapsed.ToString()[6..11]}s".Show(ConsoleColor.DarkCyan);
             "Space: ".Show(ConsoleColor.DarkBlue, false);
-            $"mb".Show(ConsoleColor.DarkCyan);
+            $"{(GC.GetTotalMemory(false) - allocated).InMegaBytes()}mb".Show(ConsoleColor.DarkCyan);
         }
 
         private static void Function3()
         {
             Stopwatch watch = Stopwatch.StartNew();
+            double allocated = GC.GetTotalMemory(false);
+
+
+
             watch.Stop();
             "Time: ".Show(ConsoleColor.DarkBlue, false);
-            $"{watch.Elapsed.ToString()[6..]}s".Show(ConsoleColor.DarkCyan);
+            $"{watch.Elapsed.ToString()[6..11]}s".Show(ConsoleColor.DarkCyan);
             "Space: ".Show(ConsoleColor.DarkBlue, false);
-            $"mb".Show(ConsoleColor.DarkCyan);
+            $"{(GC.GetTotalMemory(false) - allocated).InMegaBytes()}mb".Show(ConsoleColor.DarkCyan);
         }
 
         private static void Function4()
         {
             Stopwatch watch = Stopwatch.StartNew();
+            double allocated = GC.GetTotalMemory(false);
+
+
+
             watch.Stop();
             "Time: ".Show(ConsoleColor.DarkBlue, false);
-            $"{watch.Elapsed.ToString()[6..]}s".Show(ConsoleColor.DarkCyan);
+            $"{watch.Elapsed.ToString()[6..11]}s".Show(ConsoleColor.DarkCyan);
             "Space: ".Show(ConsoleColor.DarkBlue, false);
-            $"mb".Show(ConsoleColor.DarkCyan);
+            $"{(GC.GetTotalMemory(false) - allocated).InMegaBytes()}mb".Show(ConsoleColor.DarkCyan);
         }
 
         private static void Function5()
         {
             Stopwatch watch = Stopwatch.StartNew();
+            double allocated = GC.GetTotalMemory(false);
+
+
+
             watch.Stop();
             "Time: ".Show(ConsoleColor.DarkBlue, false);
-            $"{watch.Elapsed.ToString()[6..]}s".Show(ConsoleColor.DarkCyan);
+            $"{watch.Elapsed.ToString()[6..11]}s".Show(ConsoleColor.DarkCyan);
             "Space: ".Show(ConsoleColor.DarkBlue, false);
-            $"mb".Show(ConsoleColor.DarkCyan);
+            $"{(GC.GetTotalMemory(false) - allocated).InMegaBytes()}mb".Show(ConsoleColor.DarkCyan);
         }
 
         private static void Function6()
         {
             Stopwatch watch = Stopwatch.StartNew();
+            double allocated = GC.GetTotalMemory(false);
+
+
+
             watch.Stop();
             "Time: ".Show(ConsoleColor.DarkBlue, false);
-            $"{watch.Elapsed.ToString()[6..]}s".Show(ConsoleColor.DarkCyan);
+            $"{watch.Elapsed.ToString()[6..11]}s".Show(ConsoleColor.DarkCyan);
             "Space: ".Show(ConsoleColor.DarkBlue, false);
-            $"mb".Show(ConsoleColor.DarkCyan);
+            $"{(GC.GetTotalMemory(false) - allocated).InMegaBytes()}mb".Show(ConsoleColor.DarkCyan);
         }
 
         private static void Function7()
         {
             Stopwatch watch = Stopwatch.StartNew();
+            double allocated = GC.GetTotalMemory(false);
+
+
+
             watch.Stop();
             "Time: ".Show(ConsoleColor.DarkBlue, false);
-            $"{watch.Elapsed.ToString()[6..]}s".Show(ConsoleColor.DarkCyan);
+            $"{watch.Elapsed.ToString()[6..11]}s".Show(ConsoleColor.DarkCyan);
             "Space: ".Show(ConsoleColor.DarkBlue, false);
-            $"mb".Show(ConsoleColor.DarkCyan);
+            $"{(GC.GetTotalMemory(false) - allocated).InMegaBytes()}mb".Show(ConsoleColor.DarkCyan);
         }
 
         private static void Function8()
         {
             Stopwatch watch = Stopwatch.StartNew();
+            double allocated = GC.GetTotalMemory(false);
+
+
+
             watch.Stop();
             "Time: ".Show(ConsoleColor.DarkBlue, false);
-            $"{watch.Elapsed.ToString()[6..]}s".Show(ConsoleColor.DarkCyan);
+            $"{watch.Elapsed.ToString()[6..11]}s".Show(ConsoleColor.DarkCyan);
             "Space: ".Show(ConsoleColor.DarkBlue, false);
-            $"mb".Show(ConsoleColor.DarkCyan);
+            $"{(GC.GetTotalMemory(false) - allocated).InMegaBytes()}mb".Show(ConsoleColor.DarkCyan);
         }
 
-        private static void Welcome()
+        private static void AppIntro()
         {
-            string welcomeMessage = "Welcome To Text Mining";
+            string welcomeMessage = "Search Engine";
             Console.ForegroundColor = ConsoleColor.Magenta;
             Console.WriteLine(String.Format("{0," + ((Console.WindowWidth / 2) + (welcomeMessage.Length / 2)) + "}", welcomeMessage));
             Console.ResetColor();
@@ -234,5 +267,8 @@ namespace @Text_Mining
             Console.WriteLine();
             Console.ResetColor();
         }
+
+        public static double InMegaBytes(this double bytes)
+            => Math.Round(((bytes / 1024) / 1024), 2);
     }
 }
