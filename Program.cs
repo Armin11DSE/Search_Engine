@@ -2,6 +2,10 @@
 using System.Diagnostics;
 using System.Timers;
 using System.IO;
+using System.Collections.Generic;
+using System.Reflection.PortableExecutable;
+using System.Text.RegularExpressions;
+using System.Text;
 
 namespace @SearchEngine
 {
@@ -17,7 +21,7 @@ namespace @SearchEngine
             , "Books with a genre containing a word"
             , "Books with complete-adjacency"};
 
-
+        private static string data_address = $"{Environment.CurrentDirectory[..Environment.CurrentDirectory.IndexOf("Search Engine")]}Search Engine-Data";
 
         public static void Main()
         {
@@ -38,7 +42,7 @@ namespace @SearchEngine
                 }
                 finally
                 {
-                    Console.Clear();
+                    //Console.Clear();
                 }
             }
         }
@@ -83,8 +87,40 @@ namespace @SearchEngine
             Stopwatch watch = Stopwatch.StartNew();
             double allocated = GC.GetTotalMemory(false);
 
+            List<List<int>> data= new List<List<int>>();
 
+            Dictionary<string, int> stats = new Dictionary<string, int>();
+            var txtFiles = Directory.EnumerateFiles(data_address + "/DataSet/", "*.txt");
+            foreach (string currentFile in txtFiles)
+            {
+                string text = File.ReadAllText(currentFile);
+                char[] chars = { ' ', '.', ',', ';', ':', '?', '\n', '\r' };
+                // split words
+                string[] words = text.Split(chars);
+                int minWordLength = 2;// to count words having more than 2  characters
 
+                // iterate over the word collection to count occurrences
+                foreach (string w in words)
+                {
+                    string wrd = w.Trim().ToLower();
+                    Regex rgx = new Regex("[^A-Za-z0-9 -]");
+                    wrd = rgx.Replace(wrd, "");
+
+                    if (w.Length > minWordLength)
+                    {
+                        if (!stats.ContainsKey(w))
+                        {
+                            // add new word to collection
+                            stats.Add(wrd, 1);
+                        }
+                        else
+                        {
+                            // update word occurrence count
+                            stats[wrd] += 1;
+                        }
+                    }
+                }
+            }
             watch.Stop();
             "Time: ".Show(ConsoleColor.DarkBlue, false);
             $"{watch.Elapsed.ToString()[6..11]}s".Show(ConsoleColor.DarkCyan);
