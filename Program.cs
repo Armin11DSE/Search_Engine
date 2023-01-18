@@ -3,9 +3,9 @@ using System.Diagnostics;
 using System.Timers;
 using System.IO;
 using System.Collections.Generic;
-using System.Reflection.PortableExecutable;
 using System.Text.RegularExpressions;
 using System.Text;
+using PorterStem;
 
 namespace @SearchEngine
 {
@@ -93,29 +93,24 @@ namespace @SearchEngine
             var txtFiles = Directory.EnumerateFiles(data_address + "/DataSet/", "*.txt");
             foreach (string currentFile in txtFiles)
             {
-                string text = File.ReadAllText(currentFile);
                 char[] chars = { ' ', '.', ',', ';', ':', '?', '\n', '\r' };
-                // split words
-                string[] words = text.Split(chars);
-                int minWordLength = 2;// to count words having more than 2  characters
+                string[] text = File.ReadAllText(currentFile).Split(chars);
+                int minWordLength = 2;
 
-                // iterate over the word collection to count occurrences
-                foreach (string w in words)
+                foreach (string w in text)
                 {
-                    string wrd = w.Trim().ToLower();
-                    Regex rgx = new Regex("[^A-Za-z0-9 -]");
-                    wrd = rgx.Replace(wrd, "");
+                    string wrd = Regex.Replace(w, "[^a-zA-Z]", String.Empty);
+                    Stem stem = new Stem();
+                    wrd = stem.stem(wrd.Trim().ToLower());
 
-                    if (w.Length > minWordLength)
+                    if (wrd.Length > minWordLength)
                     {
-                        if (!stats.ContainsKey(w))
+                        if (!stats.ContainsKey(wrd))
                         {
-                            // add new word to collection
                             stats.Add(wrd, 1);
                         }
                         else
                         {
-                            // update word occurrence count
                             stats[wrd] += 1;
                         }
                     }
