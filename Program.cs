@@ -87,7 +87,7 @@ namespace @SearchEngine
 
             watch.Stop();
             "Time: ".Show(ConsoleColor.DarkBlue, false);
-            $"{watch.Elapsed.ToString()[6..11]}s".Show(ConsoleColor.DarkCyan);
+            $"{watch.Elapsed.ToString().Substring(6, 5)}s".Show(ConsoleColor.DarkCyan);
             "Space: ".Show(ConsoleColor.DarkBlue, false);
             $"{(GC.GetTotalMemory(false) - allocated).InMegaBytes()}mb".Show(ConsoleColor.DarkCyan);
         }
@@ -101,7 +101,7 @@ namespace @SearchEngine
 
             watch.Stop();
             "Time: ".Show(ConsoleColor.DarkBlue, false);
-            $"{watch.Elapsed.ToString()[6..11]}s".Show(ConsoleColor.DarkCyan);
+            $"{(watch.Elapsed.ToString()).Substring(6,5)}s".Show(ConsoleColor.DarkCyan);
             "Space: ".Show(ConsoleColor.DarkBlue, false);
             $"{(GC.GetTotalMemory(false) - allocated).InMegaBytes()}mb".Show(ConsoleColor.DarkCyan);
         }
@@ -115,7 +115,7 @@ namespace @SearchEngine
 
             watch.Stop();
             "Time: ".Show(ConsoleColor.DarkBlue, false);
-            $"{watch.Elapsed.ToString()[6..11]}s".Show(ConsoleColor.DarkCyan);
+            $"{watch.Elapsed.ToString().Substring(6, 5)}s".Show(ConsoleColor.DarkCyan);
             "Space: ".Show(ConsoleColor.DarkBlue, false);
             $"{(GC.GetTotalMemory(false) - allocated).InMegaBytes()}mb".Show(ConsoleColor.DarkCyan);
         }
@@ -129,7 +129,7 @@ namespace @SearchEngine
 
             watch.Stop();
             "Time: ".Show(ConsoleColor.DarkBlue, false);
-            $"{watch.Elapsed.ToString()[6..11]}s".Show(ConsoleColor.DarkCyan);
+            $"{watch.Elapsed.ToString().Substring(6, 5)}s".Show(ConsoleColor.DarkCyan);
             "Space: ".Show(ConsoleColor.DarkBlue, false);
             $"{(GC.GetTotalMemory(false) - allocated).InMegaBytes()}mb".Show(ConsoleColor.DarkCyan);
         }
@@ -143,7 +143,7 @@ namespace @SearchEngine
 
             watch.Stop();
             "Time: ".Show(ConsoleColor.DarkBlue, false);
-            $"{watch.Elapsed.ToString()[6..11]}s".Show(ConsoleColor.DarkCyan);
+            $"{watch.Elapsed.ToString().Substring(6, 5)}s".Show(ConsoleColor.DarkCyan);
             "Space: ".Show(ConsoleColor.DarkBlue, false);
             $"{(GC.GetTotalMemory(false) - allocated).InMegaBytes()}mb".Show(ConsoleColor.DarkCyan);
         }
@@ -157,7 +157,7 @@ namespace @SearchEngine
 
             watch.Stop();
             "Time: ".Show(ConsoleColor.DarkBlue, false);
-            $"{watch.Elapsed.ToString()[6..11]}s".Show(ConsoleColor.DarkCyan);
+            $"{watch.Elapsed.ToString().Substring(6, 5)}s".Show(ConsoleColor.DarkCyan);
             "Space: ".Show(ConsoleColor.DarkBlue, false);
             $"{(GC.GetTotalMemory(false) - allocated).InMegaBytes()}mb".Show(ConsoleColor.DarkCyan);
         }
@@ -171,7 +171,7 @@ namespace @SearchEngine
 
             watch.Stop();
             "Time: ".Show(ConsoleColor.DarkBlue, false);
-            $"{watch.Elapsed.ToString()[6..11]}s".Show(ConsoleColor.DarkCyan);
+            $"{watch.Elapsed.ToString().Substring(6, 5)}s".Show(ConsoleColor.DarkCyan);
             "Space: ".Show(ConsoleColor.DarkBlue, false);
             $"{(GC.GetTotalMemory(false) - allocated).InMegaBytes()}mb".Show(ConsoleColor.DarkCyan);
         }
@@ -185,7 +185,7 @@ namespace @SearchEngine
 
             watch.Stop();
             "Time: ".Show(ConsoleColor.DarkBlue, false);
-            $"{watch.Elapsed.ToString()[6..11]}s".Show(ConsoleColor.DarkCyan);
+            $"{watch.Elapsed.ToString().Substring(6, 5)}s".Show(ConsoleColor.DarkCyan);
             "Space: ".Show(ConsoleColor.DarkBlue, false);
             $"{(GC.GetTotalMemory(false) - allocated).InMegaBytes()}mb".Show(ConsoleColor.DarkCyan);
         }
@@ -218,7 +218,7 @@ namespace @SearchEngine
 
         public static string String(string message = "", ConsoleColor messageColor = ConsoleColor.White)
         {
-            string? string_input;
+            string string_input;
             message.Show(messageColor, false);
             while ((string_input = Console.ReadLine()) == null)
             {
@@ -229,7 +229,7 @@ namespace @SearchEngine
         }
     }
 
-    public readonly struct Range
+    public  struct Range
     {
         public readonly int min;
         public readonly int max;
