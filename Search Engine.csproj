@@ -2,11 +2,19 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
+<<<<<<< Updated upstream
     <TargetFramework>net461</TargetFramework>
     <RootNamespace>Text_Mining</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <StartupObject>SearchEngine.Program</StartupObject>
+=======
+    <TargetFramework>net46</TargetFramework>
+    <RootNamespace>Text_Mining</RootNamespace>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <StartupObject></StartupObject>
+>>>>>>> Stashed changes
   </PropertyGroup>
 
 </Project>
