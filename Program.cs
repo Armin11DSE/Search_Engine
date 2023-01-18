@@ -16,13 +16,8 @@ namespace @SearchEngine
             , "Books with a genre"
             , "Books with a genre containing a word"
             , "Books with complete-adjacency"};
-
-<<<<<<< Updated upstream
-
-=======
+       
         private static string data_address = $"{Environment.CurrentDirectory.Substring(0,Environment.CurrentDirectory.IndexOf("Search_Engine"))}Search Engine-Data";
->>>>>>> Stashed changes
-
         public static void Main()
         {
             while (true)
@@ -91,11 +86,8 @@ namespace @SearchEngine
 
             watch.Stop();
             "Time: ".Show(ConsoleColor.DarkBlue, false);
-<<<<<<< Updated upstream
             $"{watch.Elapsed.ToString().Substring(6, 5)}s".Show(ConsoleColor.DarkCyan);
-=======
-            $"{watch.Elapsed.ToString().Substring(6,5)}s".Show(ConsoleColor.DarkCyan);
->>>>>>> Stashed changes
+
             "Space: ".Show(ConsoleColor.DarkBlue, false);
             $"{(GC.GetTotalMemory(false) - allocated).InMegaBytes()}mb".Show(ConsoleColor.DarkCyan);
         }
@@ -109,11 +101,8 @@ namespace @SearchEngine
 
             watch.Stop();
             "Time: ".Show(ConsoleColor.DarkBlue, false);
-<<<<<<< Updated upstream
             $"{(watch.Elapsed.ToString()).Substring(6,5)}s".Show(ConsoleColor.DarkCyan);
-=======
-            $"{watch.Elapsed.ToString().Substring(6, 5)}s".Show(ConsoleColor.DarkCyan);
->>>>>>> Stashed changes
+
             "Space: ".Show(ConsoleColor.DarkBlue, false);
             $"{(GC.GetTotalMemory(false) - allocated).InMegaBytes()}mb".Show(ConsoleColor.DarkCyan);
         }
@@ -241,11 +230,7 @@ namespace @SearchEngine
         }
     }
 
-<<<<<<< Updated upstream
     public  struct Range
-=======
-    public struct Range
->>>>>>> Stashed changes
     {
         public readonly int min;
         public readonly int max;
