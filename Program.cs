@@ -4,6 +4,7 @@ using System.Timers;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace @SearchEngine
 {
@@ -18,8 +19,8 @@ namespace @SearchEngine
             , "Books with a genre"
             , "Books with a genre containing a word"
             , "Books with complete-adjacency"};
-       
-        private static string data_address = $"{Environment.CurrentDirectory.Substring(0,Environment.CurrentDirectory.IndexOf("Search_Engine"))}Search Engine-Data";
+
+        private static string data_address = $"{Environment.CurrentDirectory.Substring(0, Environment.CurrentDirectory.IndexOf("Search_Engine"))}Search Engine-Data";
         public static void Main()
         {
             while (true)
@@ -79,6 +80,39 @@ namespace @SearchEngine
             }
         }
 
+        private static void Initialize()
+        {
+            "Initializing...".Show(ConsoleColor.DarkBlue);
+            string[,,]data = new string[100000, 99, 10];
+            Stopwatch watch = Stopwatch.StartNew();
+            double allocated = GC.GetTotalMemory(false);
+
+            string[] txtFiles = Directory.EnumerateFiles(data_address + "/DataSet/", "*.txt").ToArray();
+            char[] chars = { ' ', '.', ',', ';', ':', '?' };
+            string[] lines;
+            string[] words;
+
+            for (int i = 0; i < 100000; i++)
+            {
+                lines = File.ReadAllLines(txtFiles[i]);
+
+                for (int j = 0; j < 99; j++)
+                {
+                    words = lines[j].Split(chars);
+                    for (int k = 0; k < 10; k++)
+                    {
+                        data[i, j, k] = words[k];
+                    }
+                }
+            }
+
+            watch.Stop();
+            "Time: ".Show(ConsoleColor.DarkBlue, false);
+            $"{watch.Elapsed.ToString()[3..8]}".Show(ConsoleColor.DarkCyan);
+            "Space: ".Show(ConsoleColor.DarkBlue, false);
+            $"{(GC.GetTotalMemory(false) - allocated).InMegaBytes()}mb".Show(ConsoleColor.DarkCyan);
+        }
+
         private static void PagesContaining(string word, int repetitionNum)
         {
             Stopwatch watch = Stopwatch.StartNew();
@@ -90,27 +124,24 @@ namespace @SearchEngine
             var txtFiles = Directory.EnumerateFiles(data_address + "/DataSet/", "*.txt");
             foreach (string currentFile in txtFiles)
             {
-                char[] chars = { ' ', '.', ',', ';', ':', '?', '\n', '\r' };
-                string[] text = File.ReadAllText(currentFile).Split(chars);
-                int minWordLength = 2;
+                string[] chars = { " ", ".", ",", ";", ":", "?" };
+                IEnumerable<string> text = SplitIntoWords(File.ReadAllText(currentFile), chars);
 
                 foreach (string w in text)
                 {
-                    string wrd = Regex.Replace(w, "[^a-zA-Z]", String.Empty);
                     Stem stem = new Stem();
-                    wrd = stem.stem(wrd.Trim().ToLower());
+                    string wrd = stem.stem(w.Trim().ToLower());
 
-                    if (wrd.Length > minWordLength)
+
+                    if (!stats.ContainsKey(wrd))
                     {
-                        if (!stats.ContainsKey(wrd))
-                        {
-                            stats.Add(wrd, 1);
-                        }
-                        else
-                        {
-                            stats[wrd] += 1;
-                        }
+                        stats.Add(wrd, 1);
                     }
+                    else
+                    {
+                        stats[wrd] += 1;
+                    }
+
                 }
             }
 
@@ -122,6 +153,24 @@ namespace @SearchEngine
             $"{(GC.GetTotalMemory(false) - allocated).InMegaBytes()}mb".Show(ConsoleColor.DarkCyan);
         }
 
+        public static IEnumerable<string> SplitIntoWords(string input,
+                                           IEnumerable<string> stopwords)
+        {
+            // use case-insensitive comparison when matching stopwords
+            var comparer = StringComparer.InvariantCultureIgnoreCase;
+            var stopwordsSet = new HashSet<string>(stopwords, comparer);
+            var splitOn = new char[] { ' ', '\t', '\r', '\n' };
+
+            // if your splitting is more complicated, you could use RegEx instead...
+            // if this becomes a bottleneck, you could use loop over the string using
+            // string.IndexOf() - but you would still need to allocate an extra string
+            // to perform comparison, so it's unclear if that would be better or not
+            var words = input.Split(splitOn, StringSplitOptions.RemoveEmptyEntries);
+
+            // return all words longer than 2 letters that are not stopwords...
+            return words.Where(w => !stopwordsSet.Contains(w) && w.Length > 2);
+        }
+
         private static void PagesContaining(string genre)
         {
             Stopwatch watch = Stopwatch.StartNew();
@@ -131,7 +180,7 @@ namespace @SearchEngine
 
             watch.Stop();
             "Time: ".Show(ConsoleColor.DarkBlue, false);
-            $"{(watch.Elapsed.ToString()).Substring(6,5)}s".Show(ConsoleColor.DarkCyan);
+            $"{(watch.Elapsed.ToString()).Substring(6, 5)}s".Show(ConsoleColor.DarkCyan);
 
             "Space: ".Show(ConsoleColor.DarkBlue, false);
             $"{(GC.GetTotalMemory(false) - allocated).InMegaBytes()}mb".Show(ConsoleColor.DarkCyan);
@@ -260,7 +309,7 @@ namespace @SearchEngine
         }
     }
 
-    public  struct Range
+    public struct Range
     {
         public readonly int min;
         public readonly int max;
