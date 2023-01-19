@@ -44,7 +44,7 @@ namespace @SearchEngine
                 }
                 finally
                 {
-                    Console.Clear();
+                    Console.ReadKey();
                 }
             }
         }
@@ -60,8 +60,19 @@ namespace @SearchEngine
                     PagesContaining(Get.String("genre: ", ConsoleColor.DarkCyan));
                     break;
                 case 3:
-                    Function3();
-                    break;
+                    {
+                        Console.Write("Enter genre : ");
+                        string G = Console.ReadLine();
+
+                        Console.Write("Enter number of page : ");
+                        int numberOfPage = int.Parse(Console.ReadLine());
+
+                        Console.Write("Enter number of common cases : ");
+                        int N = int.Parse(Console.ReadLine());
+
+                        Function3(G, numberOfPage, N);
+                        break;
+                    }
                 case 4:
                     Function4();
                     break;
@@ -116,7 +127,7 @@ namespace @SearchEngine
             int start = data_address.Length + "/Genres/".Length;
             for (int i = 0; i < 18; i++)
             {
-                genre = genreFiles[i].Substring(start, genreFiles[i].IndexOf(".txt")-start);
+                genre = genreFiles[i].Substring(start, genreFiles[i].IndexOf(".txt") - start);
                 genres.Add(genre, new List<string>());
                 lines = File.ReadAllLines(genreFiles[i]);
                 for (int j = 0; j < lines.Length; j++)
@@ -151,9 +162,10 @@ namespace @SearchEngine
                     for (int k = 0; k < 10; k++)
                         if (data[i, j, k] == word)
                             counter++;
-                        
-                    
-                    if (counter >= repetitionNum) {
+
+
+                    if (counter >= repetitionNum)
+                    {
                         pagesNum++;
                         break;
                     }
@@ -177,19 +189,15 @@ namespace @SearchEngine
             double allocated = GC.GetTotalMemory(false);
 
             if (!genres.ContainsKey(genre))
-
             {
-
                 $"{genre} isn't a valid genre".Show(ConsoleColor.Red);
-
                 return;
-
             }
 
             int pagesNum = 0;
 
             for (int i = 0; i < 100000; i++)
-                if (genres[genre].Contains(data[i, 50, 0]))
+                if (genres[genre].Contains(data[i, 49, 0]))
                     pagesNum++;
 
             pagesNum.ToString().Show(ConsoleColor.DarkYellow);
@@ -202,18 +210,65 @@ namespace @SearchEngine
             $"{(GC.GetTotalMemory(false) - allocated).InMegaBytes()}mb".Show(ConsoleColor.DarkCyan);
         }
 
-        private static void Function3()
+        private static void Function3(string G, int numberOfPage, int N)
         {
             Stopwatch watch = Stopwatch.StartNew();
             double allocated = GC.GetTotalMemory(false);
 
+            if (!genres.Keys.Contains(G))
+            {
+                $"{G} isn't a valid genre".Show(ConsoleColor.Red);
+                return;
+            }
 
+            HashSet<string> words = new HashSet<string>();
+
+            for (int i = 0; i < 99; i += 11)
+                if (genres[G].Contains(data[numberOfPage, i, 0]))
+                    if (!words.Contains(data[numberOfPage, i, 0]))
+                        words.Add(data[numberOfPage, i, 0]);
+                 
+                
+
+            if (words.Count == 0)
+            {
+                $"no words about {G} was found in page {numberOfPage}".Show(ConsoleColor.Yellow);
+                return;
+            }
+
+
+            int count = 0;
+            Console.WriteLine("Pages :");
+            for (int i = 20000; i < 30000; i++)
+            {
+                int counter = 0;
+                bool exit = false;
+                for (int j = 0; j < 99; j++)
+                {
+                    for (int a = 0; a < 10; a++)
+                    {
+                        if (words.Contains(data[i, j, a]))
+                            counter++;
+                        if (counter == N)
+                        {
+                            count++;
+                            i.ToString().Show(ConsoleColor.Gray);
+                            exit = true;
+                            break;
+                        }
+                    }
+                    if (exit)
+                        break;
+                }
+            }
+            count.ToString().Show(ConsoleColor.Red);
 
             watch.Stop();
             "Time: ".Show(ConsoleColor.DarkBlue, false);
             $"{watch.Elapsed.ToString().Substring(6, 5)}s".Show(ConsoleColor.DarkCyan);
             "Space: ".Show(ConsoleColor.DarkBlue, false);
             $"{(GC.GetTotalMemory(false) - allocated).InMegaBytes()}mb".Show(ConsoleColor.DarkCyan);
+            Console.ReadKey();
         }
 
         private static void Function4()
