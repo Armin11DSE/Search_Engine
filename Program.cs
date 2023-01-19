@@ -8,6 +8,7 @@ using System.Text;
 using PorterStem;
 using System.Globalization;
 using System.Linq;
+using System.Runtime.InteropServices;
 
 namespace @SearchEngine
 {
@@ -24,7 +25,8 @@ namespace @SearchEngine
             , "Books with complete-adjacency"};
 
         private static string data_address = $"{Environment.CurrentDirectory[..Environment.CurrentDirectory.IndexOf("Search Engine")]}Search Engine-Data";
-        private static string [,,] data;
+        private static string[,,] data = new string[100000, 99, 10];
+        private static Dictionary<string, List<string>> genres = new Dictionary<string, List<string>>(18);
 
         public static void Main()
         {
@@ -42,11 +44,11 @@ namespace @SearchEngine
                 {
                     Console.WriteLine(ex.Message);
                     "Program has crashed!\nRebooting...".Show(ConsoleColor.DarkRed);
-                    System.Threading.Tasks.Task.Delay(2000);
+                    for (ConsoleKey inputKey = Console.ReadKey(true).Key; inputKey != ConsoleKey.Spacebar && inputKey != ConsoleKey.Enter; inputKey = Console.ReadKey(true).Key) ;
                 }
                 finally
                 {
-                    //Console.Clear();
+                    Console.Clear();
                 }
             }
         }
@@ -91,8 +93,27 @@ namespace @SearchEngine
             Stopwatch watch = Stopwatch.StartNew();
             double allocated = GC.GetTotalMemory(false);
 
-            string[] txtFiles = Directory.EnumerateFiles(data_address + "/DataSet/", "*.txt").ToArray();
-            Dictionary<string, int>[] data = new Dictionary<string, int>[txtFiles.Length];
+            int pagesNum = 0;
+            for (int i = 0; i < 100000; i++)
+            {
+                int counter = 0;
+                for (int j = 0; j < 99; j++)
+                {
+                    for (int k = 0; k < 10; k++)
+                    {
+                        if (data[i, j, k] == word)
+                        {
+                            counter++;
+                        }
+                    }
+                    if (counter >= repetitionNum)
+                    {
+                        pagesNum++;
+                        break;
+                    }
+                }
+            }
+            pagesNum.ToString().Show(ConsoleColor.DarkYellow);
 
             watch.Stop();
             "Time: ".Show(ConsoleColor.DarkBlue, false);
@@ -106,7 +127,40 @@ namespace @SearchEngine
             Stopwatch watch = Stopwatch.StartNew();
             double allocated = GC.GetTotalMemory(false);
 
+            int count = 0;
+            for (int i = 0; i < 100000; i++)
+            {
+                for (int j = 0; j < 10; j++)
+                {
+                    
+                }
+                var myKey = genres.FirstOrDefault(x => x.Value.Contains(genre)).Key;
+                string[] words = new string[10];
 
+                for (int j = 0; j < 10; j++)
+                {
+                    words[j] = data[i, 50, j];
+                }
+
+                bool Break = false;
+                foreach (var _genres in genres)
+                {
+                    if (_genres.Key == genre)
+                    {
+                        foreach (string w in words)
+                        {
+                            if (_genres.Value.Contains(w))
+                            {
+                                count++;
+                                Break = true;
+                                break;
+                            }
+                        }
+                        if (Break == true) break;
+                    }
+                }
+            }
+            count.ToString().Show(ConsoleColor.DarkYellow);
 
             watch.Stop();
             "Time: ".Show(ConsoleColor.DarkBlue, false);
@@ -202,19 +256,18 @@ namespace @SearchEngine
         private static void Initialize()
         {
             "Initializing...".Show(ConsoleColor.DarkBlue);
-            data = new string[100000, 99, 10];
             Stopwatch watch = Stopwatch.StartNew();
             double allocated = GC.GetTotalMemory(false);
 
             string[] txtFiles = Directory.EnumerateFiles(data_address + "/DataSet/", "*.txt").ToArray();
-            char[] chars = { ' ', '.', ',', ';', ':', '?' };
+            char[] chars = { ' ', '.', ',', ';', '?', '!'};
             string[] lines;
             string[] words;
 
             for (int i = 0; i < 100000; i++)
             {
                 lines = File.ReadAllLines(txtFiles[i]);
-                
+
                 for (int j = 0; j < 99; j++)
                 {
                     words = lines[j].Split(chars);
@@ -225,11 +278,24 @@ namespace @SearchEngine
                 }
             }
 
+            string[] genreFiles = Directory.EnumerateFiles(data_address + "/Genres/", "*.txt").ToArray();
+            string genre;
+            for (int i = 0; i < 18; i++)
+            {
+                genre = genreFiles[i].Substring(0, genreFiles[i].IndexOf(".txt"));
+                genres.Add(genre, new List<string>());
+                lines = File.ReadAllLines(txtFiles[i]);
+                for (int j = 0; j < lines.Length; j++)
+                    genres[genre].Add(lines[j]);
+            }
+
             watch.Stop();
             "Time: ".Show(ConsoleColor.DarkBlue, false);
             $"{watch.Elapsed.ToString()[3..8]}".Show(ConsoleColor.DarkCyan);
             "Space: ".Show(ConsoleColor.DarkBlue, false);
             $"{(GC.GetTotalMemory(false) - allocated).InMegaBytes()}mb".Show(ConsoleColor.DarkCyan);
+            for (ConsoleKey inputKey = Console.ReadKey(true).Key; inputKey != ConsoleKey.Spacebar && inputKey != ConsoleKey.Enter; inputKey = Console.ReadKey(true).Key) ;
+            Console.Clear();
         }
 
         private static void AppIntro()
