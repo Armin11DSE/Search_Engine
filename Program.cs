@@ -87,35 +87,38 @@ namespace @SearchEngine
             Stopwatch watch = Stopwatch.StartNew();
             double allocated = GC.GetTotalMemory(false);
 
-            List<List<int>> data= new List<List<int>>();
+            string[] txtFiles = Directory.EnumerateFiles(data_address + "/DataSet/", "*.txt").ToArray();
+            Dictionary<string, int>[] data = new Dictionary<string, int>[txtFiles.Length];
 
-            Dictionary<string, int> stats = new Dictionary<string, int>();
-            var txtFiles = Directory.EnumerateFiles(data_address + "/DataSet/", "*.txt");
-            foreach (string currentFile in txtFiles)
+            for (int i = 0; i < txtFiles.Length; i++)
             {
+                data[i] = new Dictionary<string, int>();
                 char[] chars = { ' ', '.', ',', ';', ':', '?', '\n', '\r' };
-                string[] text = File.ReadAllText(currentFile).Split(chars);
-                int minWordLength = 2;
+                string[] text;
 
-                foreach (string w in text)
+                using (StreamReader sr = File.OpenText(txtFiles[i]))
                 {
-                    string wrd = Regex.Replace(w, "[^a-zA-Z]", String.Empty);
-                    Stem stem = new Stem();
-                    wrd = stem.stem(wrd.Trim().ToLower());
+                    text = File.ReadAllText(txtFiles[i]).Split(chars).SkipWhile(s => s.Length <= 2).ToArray();
+                }
 
-                    if (wrd.Length > minWordLength)
+                for (int j = 0; j < text.Length; j++)
+                {
+                    Stem stem = new Stem();
+                    string wrd = stem.stem(Regex.Replace(text[j], "[^a-zA-Z]", String.Empty).ToLower());
+
+                    if (!data[i].ContainsKey(wrd))
                     {
-                        if (!stats.ContainsKey(wrd))
-                        {
-                            stats.Add(wrd, 1);
-                        }
-                        else
-                        {
-                            stats[wrd] += 1;
-                        }
+                        data[i].Add(wrd, 1);
+                    }
+                    else
+                    {
+                        data[i][wrd] += 1;
                     }
                 }
+                $"{i + 1}: {watch.Elapsed.ToString()[6..11]}s".Show(ConsoleColor.DarkCyan);
+
             }
+
             watch.Stop();
             "Time: ".Show(ConsoleColor.DarkBlue, false);
             $"{watch.Elapsed.ToString()[6..11]}s".Show(ConsoleColor.DarkCyan);
