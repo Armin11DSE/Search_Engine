@@ -21,8 +21,12 @@ namespace @SearchEngine
             , "Books with complete-adjacency"};
 
         private static string data_address = $"{Environment.CurrentDirectory.Substring(0, Environment.CurrentDirectory.IndexOf("Search_Engine"))}Search Engine-Data";
+        private static string[,,] data = new string[100000, 99, 10];
+        private static Dictionary<string, List<string>> genres = new Dictionary<string, List<string>>(18);
+
         public static void Main()
         {
+            Initialize();
             while (true)
             {
                 AppIntro();
@@ -83,7 +87,6 @@ namespace @SearchEngine
         private static void Initialize()
         {
             "Initializing...".Show(ConsoleColor.DarkBlue);
-            string[,,]data = new string[100000, 99, 10];
             Stopwatch watch = Stopwatch.StartNew();
             double allocated = GC.GetTotalMemory(false);
 
@@ -106,9 +109,24 @@ namespace @SearchEngine
                 }
             }
 
+            //generate genres dictionary
+            string[] genreFiles = Directory.EnumerateFiles(data_address + "/Genres/", "*.txt").ToArray();
+            string genre;
+
+            int start = data_address.Length + "/Genres/".Length;
+            for (int i = 0; i < 18; i++)
+            {
+                genre = genreFiles[i].Substring(start, genreFiles[i].IndexOf(".txt")-start);
+                genres.Add(genre, new List<string>());
+                lines = File.ReadAllLines(genreFiles[i]);
+                for (int j = 0; j < lines.Length; j++)
+                    genres[genre].Add(lines[j]);
+            }
+
+
             watch.Stop();
             "Time: ".Show(ConsoleColor.DarkBlue, false);
-            $"{watch.Elapsed.ToString()[3..8]}".Show(ConsoleColor.DarkCyan);
+            $"{watch.Elapsed.ToString().Substring(3, 5)}".Show(ConsoleColor.DarkCyan);
             "Space: ".Show(ConsoleColor.DarkBlue, false);
             $"{(GC.GetTotalMemory(false) - allocated).InMegaBytes()}mb".Show(ConsoleColor.DarkCyan);
         }
@@ -118,32 +136,6 @@ namespace @SearchEngine
             Stopwatch watch = Stopwatch.StartNew();
             double allocated = GC.GetTotalMemory(false);
 
-            List<List<int>> data = new List<List<int>>();
-
-            Dictionary<string, int> stats = new Dictionary<string, int>();
-            var txtFiles = Directory.EnumerateFiles(data_address + "/DataSet/", "*.txt");
-            foreach (string currentFile in txtFiles)
-            {
-                string[] chars = { " ", ".", ",", ";", ":", "?" };
-                IEnumerable<string> text = SplitIntoWords(File.ReadAllText(currentFile), chars);
-
-                foreach (string w in text)
-                {
-                    Stem stem = new Stem();
-                    string wrd = stem.stem(w.Trim().ToLower());
-
-
-                    if (!stats.ContainsKey(wrd))
-                    {
-                        stats.Add(wrd, 1);
-                    }
-                    else
-                    {
-                        stats[wrd] += 1;
-                    }
-
-                }
-            }
 
             watch.Stop();
             "Time: ".Show(ConsoleColor.DarkBlue, false);
@@ -153,31 +145,20 @@ namespace @SearchEngine
             $"{(GC.GetTotalMemory(false) - allocated).InMegaBytes()}mb".Show(ConsoleColor.DarkCyan);
         }
 
-        public static IEnumerable<string> SplitIntoWords(string input,
-                                           IEnumerable<string> stopwords)
-        {
-            // use case-insensitive comparison when matching stopwords
-            var comparer = StringComparer.InvariantCultureIgnoreCase;
-            var stopwordsSet = new HashSet<string>(stopwords, comparer);
-            var splitOn = new char[] { ' ', '\t', '\r', '\n' };
-
-            // if your splitting is more complicated, you could use RegEx instead...
-            // if this becomes a bottleneck, you could use loop over the string using
-            // string.IndexOf() - but you would still need to allocate an extra string
-            // to perform comparison, so it's unclear if that would be better or not
-            var words = input.Split(splitOn, StringSplitOptions.RemoveEmptyEntries);
-
-            // return all words longer than 2 letters that are not stopwords...
-            return words.Where(w => !stopwordsSet.Contains(w) && w.Length > 2);
-        }
 
         private static void PagesContaining(string genre)
         {
             Stopwatch watch = Stopwatch.StartNew();
             double allocated = GC.GetTotalMemory(false);
 
+            int pagesNum = 0;
+            for (int i = 0; i < 100000; i++) { 
+                for (int j = 0; j < 10; j++)
+                    if (genres.FirstOrDefault(x => x.Value.Contains(data[i, 50, j])).Key == genre)
+                        pagesNum++;
+            }
 
-
+            pagesNum.ToString().Show(ConsoleColor.DarkYellow);
             watch.Stop();
             "Time: ".Show(ConsoleColor.DarkBlue, false);
             $"{(watch.Elapsed.ToString()).Substring(6, 5)}s".Show(ConsoleColor.DarkCyan);
