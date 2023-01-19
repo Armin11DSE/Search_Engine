@@ -2,6 +2,8 @@
 using System.Diagnostics;
 using System.Timers;
 using System.IO;
+using System.Text.RegularExpressions;
+using System.Collections.Generic;
 
 namespace @SearchEngine
 {
@@ -82,7 +84,35 @@ namespace @SearchEngine
             Stopwatch watch = Stopwatch.StartNew();
             double allocated = GC.GetTotalMemory(false);
 
+            List<List<int>> data = new List<List<int>>();
 
+            Dictionary<string, int> stats = new Dictionary<string, int>();
+            var txtFiles = Directory.EnumerateFiles(data_address + "/DataSet/", "*.txt");
+            foreach (string currentFile in txtFiles)
+            {
+                char[] chars = { ' ', '.', ',', ';', ':', '?', '\n', '\r' };
+                string[] text = File.ReadAllText(currentFile).Split(chars);
+                int minWordLength = 2;
+
+                foreach (string w in text)
+                {
+                    string wrd = Regex.Replace(w, "[^a-zA-Z]", String.Empty);
+                    Stem stem = new Stem();
+                    wrd = stem.stem(wrd.Trim().ToLower());
+
+                    if (wrd.Length > minWordLength)
+                    {
+                        if (!stats.ContainsKey(wrd))
+                        {
+                            stats.Add(wrd, 1);
+                        }
+                        else
+                        {
+                            stats[wrd] += 1;
+                        }
+                    }
+                }
+            }
 
             watch.Stop();
             "Time: ".Show(ConsoleColor.DarkBlue, false);

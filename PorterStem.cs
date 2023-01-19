@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Text;
 
-namespace @PorterStem
+namespace SearchEngine
 {
     public class Stem
     {
