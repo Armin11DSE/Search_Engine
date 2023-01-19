@@ -136,6 +136,31 @@ namespace @SearchEngine
             Stopwatch watch = Stopwatch.StartNew();
             double allocated = GC.GetTotalMemory(false);
 
+            int pagesNum = 0;
+
+            for (int i = 0; i < 100000; i++)
+
+            {
+
+                int counter = 0;
+
+                for (int j = 0; j < 99; j++)
+
+                {
+
+                    for (int k = 0; k < 10; k++)
+                        if (data[i, j, k] == word)
+                            counter++;
+                        
+                    
+                    if (counter >= repetitionNum) {
+                        pagesNum++;
+                        break;
+                    }
+                }
+            }
+
+            pagesNum.ToString().Show(ConsoleColor.DarkYellow);
 
             watch.Stop();
             "Time: ".Show(ConsoleColor.DarkBlue, false);
@@ -151,15 +176,25 @@ namespace @SearchEngine
             Stopwatch watch = Stopwatch.StartNew();
             double allocated = GC.GetTotalMemory(false);
 
-            int pagesNum = 0;
-            for (int i = 0; i < 100000; i++) { 
-                for (int j = 0; j < 10; j++)
-                    if (genres.FirstOrDefault(x => x.Value.Contains(data[i, 50, j])).Key == genre)
-                        pagesNum++;
+            if (!genres.ContainsKey(genre))
+
+            {
+
+                $"{genre} isn't a valid genre".Show(ConsoleColor.Red);
+
+                return;
+
             }
+
+            int pagesNum = 0;
+
+            for (int i = 0; i < 100000; i++)
+                if (genres[genre].Contains(data[i, 50, 0]))
+                    pagesNum++;
 
             pagesNum.ToString().Show(ConsoleColor.DarkYellow);
             watch.Stop();
+
             "Time: ".Show(ConsoleColor.DarkBlue, false);
             $"{(watch.Elapsed.ToString()).Substring(6, 5)}s".Show(ConsoleColor.DarkCyan);
 
