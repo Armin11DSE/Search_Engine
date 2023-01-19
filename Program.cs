@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Text;
 using PorterStem;
+using System.Globalization;
+using System.Linq;
 
 namespace @SearchEngine
 {
@@ -22,9 +24,11 @@ namespace @SearchEngine
             , "Books with complete-adjacency"};
 
         private static string data_address = $"{Environment.CurrentDirectory[..Environment.CurrentDirectory.IndexOf("Search Engine")]}Search Engine-Data";
+        private static string [,,] data;
 
         public static void Main()
         {
+            Initialize();
             while (true)
             {
                 AppIntro();
@@ -89,35 +93,6 @@ namespace @SearchEngine
 
             string[] txtFiles = Directory.EnumerateFiles(data_address + "/DataSet/", "*.txt").ToArray();
             Dictionary<string, int>[] data = new Dictionary<string, int>[txtFiles.Length];
-
-            for (int i = 0; i < txtFiles.Length; i++)
-            {
-                data[i] = new Dictionary<string, int>();
-                char[] chars = { ' ', '.', ',', ';', ':', '?', '\n', '\r' };
-                string[] text;
-
-                using (StreamReader sr = File.OpenText(txtFiles[i]))
-                {
-                    text = File.ReadAllText(txtFiles[i]).Split(chars).SkipWhile(s => s.Length <= 2).ToArray();
-                }
-
-                for (int j = 0; j < text.Length; j++)
-                {
-                    Stem stem = new Stem();
-                    string wrd = stem.stem(Regex.Replace(text[j], "[^a-zA-Z]", String.Empty).ToLower());
-
-                    if (!data[i].ContainsKey(wrd))
-                    {
-                        data[i].Add(wrd, 1);
-                    }
-                    else
-                    {
-                        data[i][wrd] += 1;
-                    }
-                }
-                $"{i + 1}: {watch.Elapsed.ToString()[6..11]}s".Show(ConsoleColor.DarkCyan);
-
-            }
 
             watch.Stop();
             "Time: ".Show(ConsoleColor.DarkBlue, false);
@@ -220,6 +195,39 @@ namespace @SearchEngine
             watch.Stop();
             "Time: ".Show(ConsoleColor.DarkBlue, false);
             $"{watch.Elapsed.ToString()[6..11]}s".Show(ConsoleColor.DarkCyan);
+            "Space: ".Show(ConsoleColor.DarkBlue, false);
+            $"{(GC.GetTotalMemory(false) - allocated).InMegaBytes()}mb".Show(ConsoleColor.DarkCyan);
+        }
+
+        private static void Initialize()
+        {
+            "Initializing...".Show(ConsoleColor.DarkBlue);
+            data = new string[100000, 99, 10];
+            Stopwatch watch = Stopwatch.StartNew();
+            double allocated = GC.GetTotalMemory(false);
+
+            string[] txtFiles = Directory.EnumerateFiles(data_address + "/DataSet/", "*.txt").ToArray();
+            char[] chars = { ' ', '.', ',', ';', ':', '?' };
+            string[] lines;
+            string[] words;
+
+            for (int i = 0; i < 100000; i++)
+            {
+                lines = File.ReadAllLines(txtFiles[i]);
+                
+                for (int j = 0; j < 99; j++)
+                {
+                    words = lines[j].Split(chars);
+                    for (int k = 0; k < 10; k++)
+                    {
+                        data[i, j, k] = words[k];
+                    }
+                }
+            }
+
+            watch.Stop();
+            "Time: ".Show(ConsoleColor.DarkBlue, false);
+            $"{watch.Elapsed.ToString()[3..8]}".Show(ConsoleColor.DarkCyan);
             "Space: ".Show(ConsoleColor.DarkBlue, false);
             $"{(GC.GetTotalMemory(false) - allocated).InMegaBytes()}mb".Show(ConsoleColor.DarkCyan);
         }
