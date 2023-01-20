@@ -3,11 +3,10 @@ using System.Diagnostics;
 using System.Timers;
 using System.IO;
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
 using System.Text;
-using PorterStem;
 using System.Globalization;
 using System.Linq;
+using System.Security.Cryptography;
 
 namespace @SearchEngine
 {
@@ -24,7 +23,10 @@ namespace @SearchEngine
             , "Books with complete-adjacency"};
 
         private static string data_address = $"{Environment.CurrentDirectory[..Environment.CurrentDirectory.IndexOf("Search Engine")]}Search Engine-Data";
-        private static string [,,] data;
+        private static List<string>[,] data = new List<string>[100000, 99];
+        private static Dictionary<string, HashSet<string>> genres = new Dictionary<string, HashSet<string>>(18);
+        private static Stopwatch watch = new Stopwatch();
+        private static double beforeAllocation;
 
         public static void Main()
         {
@@ -42,187 +44,376 @@ namespace @SearchEngine
                 {
                     Console.WriteLine(ex.Message);
                     "Program has crashed!\nRebooting...".Show(ConsoleColor.DarkRed);
-                    System.Threading.Tasks.Task.Delay(2000);
+                    for (ConsoleKey inputKey = Console.ReadKey(true).Key; inputKey != ConsoleKey.Spacebar && inputKey != ConsoleKey.Enter; inputKey = Console.ReadKey(true).Key) ;
                 }
                 finally
                 {
-                    //Console.Clear();
+                    watch.Reset();
+                    Console.Clear();
                 }
             }
         }
 
         private static void CallFunction(int option)
         {
-            switch (option)
+            try
             {
-                case 1:
-                    PagesContaining(Get.String("word: ", ConsoleColor.DarkCyan), Get.Int(new Range(1), "number of repetitions: ", ConsoleColor.DarkCyan));
-                    break;
-                case 2:
-                    PagesContaining(Get.String("genre: ", ConsoleColor.DarkCyan));
-                    break;
-                case 3:
-                    Function3();
-                    break;
-                case 4:
-                    Function4();
-                    break;
-                case 5:
-                    Function5();
-                    break;
-                case 6:
-                    Function6();
-                    break;
-                case 7:
-                    Function7();
-                    break;
-                case 8:
-                    Function8();
-                    break;
-                case 0:
-                    Terminate();
-                    Environment.Exit(0);
-                    break;
+                switch (option)
+                {
+                    case 1:
+                        PagesContaining(Get.String("Word: ", ConsoleColor.DarkCyan), Get.Int(new Range(1), "Number of Repetitions: ", ConsoleColor.DarkCyan)).ToString().Show(ConsoleColor.DarkYellow);
+                        break;
+                    case 2:
+                        PagesWithMainGenre(Get.String("Genre: ", ConsoleColor.DarkCyan)).ToString().Show(ConsoleColor.DarkYellow);
+                        break;
+                    case 3:
+                        int output = SimpleAdjacentPages(Get.String("Genre: ", ConsoleColor.DarkCyan), Get.Int(new Range(0, 99999), "Page Number: ", ConsoleColor.DarkCyan), Get.Int(new Range(1), "Number of Common Words: ", ConsoleColor.DarkCyan), new Range(20000, 30000), out List<int> pages);
+                        "Pages: ".Show(ConsoleColor.DarkBlue);
+                        pages.Show(ConsoleColor.DarkYellow);
+                        "Total Number of Pages: ".Show(ConsoleColor.DarkBlue, false);
+                        output.ToString().Show(ConsoleColor.DarkYellow);
+                        break;
+                    case 4:
+                        output = AdjacentPages(Get.Int(new Range(0, 99999), "Page Number: ", ConsoleColor.DarkCyan), Get.Int(new Range(1), "Number of Common Words: ", ConsoleColor.DarkCyan), new Range(5000, 10000), out pages);
+                        "Pages: ".Show(ConsoleColor.DarkBlue);
+                        pages.Show(ConsoleColor.DarkYellow);
+                        "Total Number of Pages: ".Show(ConsoleColor.DarkBlue, false);
+                        output.ToString().Show(ConsoleColor.DarkYellow);
+                        break;
+                    case 5:
+                        output = CompleteAdjacentPages(Get.Int(new Range(0, 99999), "Page Number: ", ConsoleColor.DarkCyan), Get.Int(new Range(1, 18), "Number of Common Genres: ", ConsoleColor.DarkCyan), Get.Int(new Range(1), "Number of Common Words: ", ConsoleColor.DarkCyan), new Range(2000, 3000), out pages);
+                        "Pages: ".Show(ConsoleColor.DarkBlue);
+                        pages.Show(ConsoleColor.DarkYellow);
+                        "Total Number of Pages: ".Show(ConsoleColor.DarkBlue, false);
+                        output.ToString().Show(ConsoleColor.DarkYellow);
+                        break;
+                    case 6:
+                        output = BooksWithGenre(Get.String("Genre: ", ConsoleColor.DarkCyan), Get.Int(new Range(1), "Number of Common Words: ", ConsoleColor.DarkCyan),new Range(1000, 1500), out List<List<int>> books);
+                        "Pages: ".Show(ConsoleColor.DarkBlue);
+                        books.Show("Book", ConsoleColor.DarkYellow);
+                        "Total Number of Pages: ".Show(ConsoleColor.DarkBlue, false);
+                        output.ToString().Show(ConsoleColor.DarkYellow);
+                        break;
+                    case 7:
+                        BooksContaining();
+                        break;
+                    case 8:
+                        Function8();
+                        break;
+                    case 0:
+                        Terminate();
+                        Environment.Exit(0);
+                        break;
+                }
+
+                watch.Stop();
+                "Time: ".Show(ConsoleColor.DarkBlue, false);
+                $"{watch.Elapsed.ToString()[6..]}s".Show(ConsoleColor.DarkCyan);
+                "Space: ".Show(ConsoleColor.DarkBlue, false);
+                $"{(GC.GetTotalAllocatedBytes() - beforeAllocation).InMegaBytes()}mb".Show(ConsoleColor.DarkCyan);
+            }
+            catch (Exception ex)
+            {
+                ex.Message.Show(ConsoleColor.DarkRed);
             }
         }
 
-        private static void PagesContaining(string word, int repetitionNum)
+        private static int PagesContaining(string word, int repetitionNum)
         {
-            Stopwatch watch = Stopwatch.StartNew();
-            double allocated = GC.GetTotalMemory(false);
+            watch.Start();
+            beforeAllocation = GC.GetTotalAllocatedBytes();
 
-            string[] txtFiles = Directory.EnumerateFiles(data_address + "/DataSet/", "*.txt").ToArray();
-            Dictionary<string, int>[] data = new Dictionary<string, int>[txtFiles.Length];
+            int pagesNum = 0;
+            for (int i = 0; i < 100000; i++)
+            {
+                int counter = 0;
+                for (int j = 0; j < 99; j++)
+                {
+                    counter += data[i, j].Count(x => x == word);
+                    if (counter >= repetitionNum)
+                    {
+                        pagesNum++;
+                        break;
+                    }
+                }
+            }
 
-            watch.Stop();
-            "Time: ".Show(ConsoleColor.DarkBlue, false);
-            $"{watch.Elapsed.ToString()[6..11]}s".Show(ConsoleColor.DarkCyan);
-            "Space: ".Show(ConsoleColor.DarkBlue, false);
-            $"{(GC.GetTotalMemory(false) - allocated).InMegaBytes()}mb".Show(ConsoleColor.DarkCyan);
+            return pagesNum;
         }
 
-        private static void PagesContaining(string genre)
+        private static int PagesWithMainGenre(string genre)
         {
-            Stopwatch watch = Stopwatch.StartNew();
-            double allocated = GC.GetTotalMemory(false);
+            watch.Start();
+            beforeAllocation = GC.GetTotalAllocatedBytes();
 
+            if (!genres.ContainsKey(genre))
+                throw new Exception($"{genre} isn't a valid genre");
 
+            int pagesNum = 0;
+            for (int i = 0; i < 100000; i++)
+            {
+                string word = data[i, 49].First();
+                for (int k = 0; k <= 2; k++, word += $" {data[i, 49][k]}")
+                {
+                    if (genres[genre].Contains(word))
+                    {
+                        pagesNum++;
+                        break;
+                    }
+                }
+            }
 
-            watch.Stop();
-            "Time: ".Show(ConsoleColor.DarkBlue, false);
-            $"{watch.Elapsed.ToString()[6..11]}s".Show(ConsoleColor.DarkCyan);
-            "Space: ".Show(ConsoleColor.DarkBlue, false);
-            $"{(GC.GetTotalMemory(false) - allocated).InMegaBytes()}mb".Show(ConsoleColor.DarkCyan);
+            return pagesNum;
         }
 
-        private static void Function3()
+        private static int SimpleAdjacentPages(string genre, int pageNum, int commonWordsNum, Range range, out List<int> pages)
         {
-            Stopwatch watch = Stopwatch.StartNew();
-            double allocated = GC.GetTotalMemory(false);
+            watch.Start();
+            beforeAllocation = GC.GetTotalAllocatedBytes();
 
+            if (!genres.Keys.Contains(genre))
+                throw new Exception($"{genre} isn't a valid genre");
 
+            pages = new List<int>();
+            HashSet<string> words = new HashSet<string>();
+            for (int j = 0; j < 99; j += 11)
+            {
+                for (int k = 0; k < data[pageNum, j].Count; k++)
+                {
+                    string word = data[pageNum, j][k];
+                    if (genres[genre].Contains(word))
+                    {
+                        if (!words.Contains(word))
+                            words.Add(word);
+                    }
+                    else
+                    {
+                        k++;
+                        for (int c = 1; k < data[pageNum, j].Count && c <= 2; k++, c++)
+                        {
+                            word += $" {data[pageNum, j][k]}";
+                            if (genres[genre].Contains(word))
+                            {
+                                if (!words.Contains(word))
+                                    words.Add(word);
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            
+            for (int i = range.min; i < range.max; i++)
+            {
+                if (i == pageNum)
+                    continue;
 
-            watch.Stop();
-            "Time: ".Show(ConsoleColor.DarkBlue, false);
-            $"{watch.Elapsed.ToString()[6..11]}s".Show(ConsoleColor.DarkCyan);
-            "Space: ".Show(ConsoleColor.DarkBlue, false);
-            $"{(GC.GetTotalMemory(false) - allocated).InMegaBytes()}mb".Show(ConsoleColor.DarkCyan);
+                int counter = 0;
+                bool exit = false;
+                for (int j = 0; !exit && j < 99; j++)
+                {
+                    for (int k = 0; k < data[i, j].Count; k++)
+                    {
+                        string word = data[i, j][k];
+                        if (words.Contains(word))
+                        {
+                            counter++;
+                        }
+                        else
+                        {
+                            for (int c = 1; k + c < data[i, j].Count && c <= 2; c++)
+                            {
+                                word += $" {data[i, j][k + c]}";
+                                if (words.Contains(word))
+                                {
+                                    counter++;
+                                    k += c;
+                                    break;
+                                }
+                            }
+                        }
+
+                        if (counter == commonWordsNum)
+                        {
+                            pages.Add(i);
+                            exit = true;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            return pages.Count;
         }
 
-        private static void Function4()
+        private static int AdjacentPages(int pageNum, int commonWordsNum, Range range, out List<int> pages)
         {
-            Stopwatch watch = Stopwatch.StartNew();
-            double allocated = GC.GetTotalMemory(false);
+            watch.Start();
+            beforeAllocation = GC.GetTotalAllocatedBytes();
 
+            pages = new List<int>();
+            Dictionary<string, List<string>> genreWords = new Dictionary<string, List<string>>(9);
+            for (int i = 0; i < 99;)
+            {
+                string word = data[pageNum, i].First();
+                string genre = genres.FirstOrDefault(x => x.Value.Contains(word)).Key;
+                for (int k = 1; genre == default; k++, word += $" {data[pageNum, i][k]}")
+                    genre = genres.FirstOrDefault(x => x.Value.Contains(word)).Key;
 
+                genreWords.Add(genre, new List<string>(330));
+                i += 11;
+                for (int j = i - 11; j < i; j++)
+                    genreWords[genre].AddRange(data[i, j]);
+            }
 
-            watch.Stop();
-            "Time: ".Show(ConsoleColor.DarkBlue, false);
-            $"{watch.Elapsed.ToString()[6..11]}s".Show(ConsoleColor.DarkCyan);
-            "Space: ".Show(ConsoleColor.DarkBlue, false);
-            $"{(GC.GetTotalMemory(false) - allocated).InMegaBytes()}mb".Show(ConsoleColor.DarkCyan);
+            for (int i = range.min; i < range.max; i++)
+            {
+                if (i == pageNum)
+                    continue;
+
+                int counter;
+                bool isAdjacent = false;
+                for (int _i = 0; !isAdjacent && _i < 99;)
+                {
+                    counter = 0;
+                    string word = data[i, _i].First();
+                    string genre = genre = genres.FirstOrDefault(x => x.Value.Contains(word)).Key;
+                    for (int k = 0; genre == default; k++, word += $" {data[i, _i][k]}", genre = genres.FirstOrDefault(x => x.Value.Contains(word)).Key) ;
+
+                    _i += 11;
+                    if (!genreWords.ContainsKey(genre))
+                        continue;
+
+                    for (int j = _i - 11; !isAdjacent && j < _i; j++)
+                    {
+                        for (int k = 0; k < data[i, j].Count; k++)
+                        {
+                            if (genreWords[genre].Contains(data[i, j][k]))
+                                counter++;
+                            if (counter == commonWordsNum)
+                            {
+                                isAdjacent = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+                if (isAdjacent)
+                {
+                    pages.Add(i);
+                }
+            }
+            return pages.Count;
         }
 
-        private static void Function5()
+        private static int CompleteAdjacentPages(int pageNum, int commonGenresNum, int commonWordsNum, Range range, out List<int> pages)
         {
-            Stopwatch watch = Stopwatch.StartNew();
-            double allocated = GC.GetTotalMemory(false);
+            watch.Start();
+            beforeAllocation = GC.GetTotalAllocatedBytes();
 
+            pages = new List<int>();
+            Dictionary<string, int> givenPageGeners = new Dictionary<string, int>(9);
 
+            for (int j = 0; j < 99; j += 11)
+            {
+                string word = data[pageNum, j].First();
+                string genre = genres.FirstOrDefault(x => x.Value.Contains(word)).Key;
+                for (int k = 0; genre == default; k++, word += $" {data[pageNum, j][k]}", genre = genres.FirstOrDefault(x => x.Value.Contains(word)).Key) ;
+                givenPageGeners.Add(genre, j);
+            }
 
-            watch.Stop();
-            "Time: ".Show(ConsoleColor.DarkBlue, false);
-            $"{watch.Elapsed.ToString()[6..11]}s".Show(ConsoleColor.DarkCyan);
-            "Space: ".Show(ConsoleColor.DarkBlue, false);
-            $"{(GC.GetTotalMemory(false) - allocated).InMegaBytes()}mb".Show(ConsoleColor.DarkCyan);
+            for (int i = range.min; i < range.max; i++)
+            {
+                if (i == pageNum)
+                    continue;
+
+                int commonGenres = 0;
+                for (int j = 0; commonGenres < commonGenresNum && j < 99;)
+                {
+                    string word = data[pageNum, j].First();
+                    string genre = genres.FirstOrDefault(x => x.Value.Contains(word)).Key;
+                    for (int k = 0; genre == default; k++, word += $" {data[pageNum, j][k]}", genre = genres.FirstOrDefault(x => x.Value.Contains(word)).Key) ;
+
+                    j += 11;
+                    if (givenPageGeners.ContainsKey(genre))
+                    {
+                        int paragraghIndex = givenPageGeners[genre];
+                        int commonwords = 0;
+
+                        for (int l1 = j - 11; commonwords < commonWordsNum && l1 < j; l1++)
+                        {
+                            for (int l2 = paragraghIndex; commonwords < commonWordsNum && l2 < paragraghIndex + 11; l2++)
+                            {
+                                for (int w2 = 0; commonwords < commonWordsNum && w2 < data[i, l2].Count; w2++)
+                                {
+                                    commonwords += data[i, l1].Count(x => x == data[i, l2][w2]);
+                                }
+                            }
+                        }
+                        if (commonwords >= commonWordsNum)
+                            commonGenres++;
+                    }
+                }
+
+                if (commonGenres >= commonGenresNum)
+                    pages.Add(i);
+            }
+
+            return pages.Count;
         }
 
-        private static void Function6()
+        private static int BooksWithGenre(string genre, int commonWordsNum,Range range, out List<List<int>> books)
         {
-            Stopwatch watch = Stopwatch.StartNew();
-            double allocated = GC.GetTotalMemory(false);
+            watch.Start();
+            beforeAllocation = GC.GetTotalAllocatedBytes();
 
-
-
-            watch.Stop();
-            "Time: ".Show(ConsoleColor.DarkBlue, false);
-            $"{watch.Elapsed.ToString()[6..11]}s".Show(ConsoleColor.DarkCyan);
-            "Space: ".Show(ConsoleColor.DarkBlue, false);
-            $"{(GC.GetTotalMemory(false) - allocated).InMegaBytes()}mb".Show(ConsoleColor.DarkCyan);
+            books = new List<List<int>>();
+            for (int i = range.min; i < range.max; i++)
+            {
+                SimpleAdjacentPages(genre, i, commonWordsNum, range, out List<int> pages);
+                books.Add(pages); 
+            }
+            return books.Count();
         }
 
-        private static void Function7()
+        private static void BooksContaining()
         {
-            Stopwatch watch = Stopwatch.StartNew();
-            double allocated = GC.GetTotalMemory(false);
 
-
-
-            watch.Stop();
-            "Time: ".Show(ConsoleColor.DarkBlue, false);
-            $"{watch.Elapsed.ToString()[6..11]}s".Show(ConsoleColor.DarkCyan);
-            "Space: ".Show(ConsoleColor.DarkBlue, false);
-            $"{(GC.GetTotalMemory(false) - allocated).InMegaBytes()}mb".Show(ConsoleColor.DarkCyan);
         }
 
         private static void Function8()
         {
-            Stopwatch watch = Stopwatch.StartNew();
-            double allocated = GC.GetTotalMemory(false);
 
-
-
-            watch.Stop();
-            "Time: ".Show(ConsoleColor.DarkBlue, false);
-            $"{watch.Elapsed.ToString()[6..11]}s".Show(ConsoleColor.DarkCyan);
-            "Space: ".Show(ConsoleColor.DarkBlue, false);
-            $"{(GC.GetTotalMemory(false) - allocated).InMegaBytes()}mb".Show(ConsoleColor.DarkCyan);
         }
 
         private static void Initialize()
         {
             "Initializing...".Show(ConsoleColor.DarkBlue);
-            data = new string[100000, 99, 10];
             Stopwatch watch = Stopwatch.StartNew();
             double allocated = GC.GetTotalMemory(false);
 
-            string[] txtFiles = Directory.EnumerateFiles(data_address + "/DataSet/", "*.txt").ToArray();
-            char[] chars = { ' ', '.', ',', ';', ':', '?' };
+            string txtFilesAddress = data_address + "/DataSet/Text_";
             string[] lines;
-            string[] words;
 
             for (int i = 0; i < 100000; i++)
             {
-                lines = File.ReadAllLines(txtFiles[i]);
-                
+                lines = File.ReadAllLines(txtFilesAddress + i + ".txt");
                 for (int j = 0; j < 99; j++)
                 {
-                    words = lines[j].Split(chars);
-                    for (int k = 0; k < 10; k++)
-                    {
-                        data[i, j, k] = words[k];
-                    }
+                    data[i, j] = lines[j].Split().ToList();
                 }
+            }
+
+            string[] genreFiles = Directory.EnumerateFiles(data_address + "/Genres/", "*.txt").ToArray();
+            string genre;
+            int start = data_address.Length + "/Genres/".Length;
+            for (int i = 0; i < 18; i++)
+            {
+                genre = genreFiles[i].Substring(start, genreFiles[i].IndexOf(".txt") - start);
+                genres.Add(genre, new HashSet<string>());
+                lines = File.ReadAllLines(genreFiles[i]);
+                for (int j = 0; j < lines.Length; j++)
+                    genres[genre].Add(lines[j]);
             }
 
             watch.Stop();
@@ -230,6 +421,8 @@ namespace @SearchEngine
             $"{watch.Elapsed.ToString()[3..8]}".Show(ConsoleColor.DarkCyan);
             "Space: ".Show(ConsoleColor.DarkBlue, false);
             $"{(GC.GetTotalMemory(false) - allocated).InMegaBytes()}mb".Show(ConsoleColor.DarkCyan);
+            for (ConsoleKey inputKey = Console.ReadKey(true).Key; inputKey != ConsoleKey.Spacebar && inputKey != ConsoleKey.Enter; inputKey = Console.ReadKey(true).Key) ;
+            Console.Clear();
         }
 
         private static void AppIntro()
@@ -301,11 +494,39 @@ namespace @SearchEngine
             Console.ResetColor();
         }
 
-        public static void Show(this string[] menu, ConsoleColor color = ConsoleColor.White)
+        public static void Show(this IEnumerable<string> list, ConsoleColor color = ConsoleColor.White)
         {
             Console.ForegroundColor = color;
-            for (int i = 0; i < menu.Length; i++)
-                Console.WriteLine($"{i + 1}.{menu[i]}");
+            for (int i = 0; i < list.Count(); i++)
+                Console.WriteLine(list.ElementAt(i));
+            Console.WriteLine();
+            Console.ResetColor();
+        }
+
+        public static void Show(this IEnumerable<int> list, ConsoleColor color = ConsoleColor.White)
+        {
+            Console.ForegroundColor = color;
+            for (int i = 0, wordCounter = 1; i < list.Count(); i++, wordCounter++)
+            {
+                Console.Write($"\"{list.ElementAt(i)}\"  ");
+                if (wordCounter == 10)
+                {
+                    Console.WriteLine();
+                    wordCounter = 0;
+                }
+            }
+            Console.WriteLine();
+            Console.ResetColor();
+        }
+
+        public static void Show(this IEnumerable<IEnumerable<int>> list, string name = "", ConsoleColor color = ConsoleColor.White)
+        {
+            Console.ForegroundColor = color;
+            for (int i = 0; i < list.Count(); i++)
+            {
+                Console.WriteLine($"{name}{i + 1}");
+                list.ElementAt(i).Show(color);
+            }
             Console.WriteLine();
             Console.ResetColor();
         }
