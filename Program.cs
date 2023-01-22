@@ -111,6 +111,7 @@ namespace @SearchEngine
             }
         }
 
+        //Part_1
         private static int PagesContaining(string word, int repetitionNum)
         {
             watch.Start();
@@ -136,6 +137,7 @@ namespace @SearchEngine
             return pagesNum;
         }
 
+        //Part_2
         private static int PagesWithMainGenre(string genre)
         {
             watch.Start();
@@ -163,12 +165,13 @@ namespace @SearchEngine
             return pagesNum;
         }
 
+        //Part_3
         private static int SimpleAdjacentPages(string genre, int pageNum, int commonWordsNum, Range range, out List<int> pages)
         {
             watch.Start();
             allocated = Process.GetCurrentProcess().PrivateMemorySize64;
 
-            if (!genres.Keys.Contains(genre))
+            if (!genres.ContainsKey(genre))
                 throw new Exception($"{genre} isn't a valid genre");
 
             pages = new List<int>();
@@ -245,6 +248,7 @@ namespace @SearchEngine
             return pages.Count;
         }
 
+        //Part_4
         private static int AdjacentPages(int pageNum, int commonWordsNum, Range range, out List<int> pages)
         {
             watch.Start();
@@ -308,6 +312,7 @@ namespace @SearchEngine
             return pages.Count;
         }
 
+        //Part_5
         private static int CompleteAdjacentPages(int pageNum, int commonGenresNum, int commonWordsNum, Range range, out List<int> pages)
         {
             watch.Start();
@@ -372,9 +377,10 @@ namespace @SearchEngine
             return pages.Count;
         }
 
+        //Part_6
         private static int BooksWithGenre(string genre, int commonWordsNum, Range range, out List<List<int>> books, out bool[,] adjacencyMatrix)
         {
-            if (!genres.Keys.Contains(genre))
+            if (!genres.ContainsKey(genre))
                 throw new Exception($"{genre} isn't a valid genre");
 
             watch.Start();
@@ -474,25 +480,26 @@ namespace @SearchEngine
                     books.Add(new List<int>());
                 }
             }
-            
+
             if (books.Last().Count == 0)
                 books.Remove(books.Last());
 
             watch.Stop();
             allocated = Process.GetCurrentProcess().PrivateMemorySize64 - allocated;
-            return books.Count();
+            return books.Count;
         }
 
-        private static int BooksContaining(string genre, string word, int repetitionsNum, int commonWordsNum,out List<List<int>> books)
+        //Part_7
+        private static int BooksContaining(string genre, string word, int repetitionsNum, int commonWordsNum, out List<List<int>> books)
         {
             watch.Start();
             allocated = Process.GetCurrentProcess().PrivateMemorySize64;
 
             books = new List<List<int>>();
-            BooksWithGenre(genre, repetitionsNum, new Range(1000, 1500), out List<List<int>> _books, out bool[,] adjacencyMatrix);
-            int counter = 0;
+            BooksWithGenre(genre, commonWordsNum, new Range(1000, 1500), out List<List<int>> _books, out bool[,] adjacencyMatrix);
             for (int book = 0; book < _books.Count; book++)
             {
+                int counter = 0;
                 for (int page = 0; page < _books[book].Count && counter < repetitionsNum; page++)
                 {
                     for (int j = 0; j < 99 && counter < repetitionsNum; j++)
@@ -515,6 +522,7 @@ namespace @SearchEngine
             return books.Count;
         }
 
+        //Part_8
         private static int LargestCompleteBook(int repetitionsNum, out List<int> largestBook)
         {
             watch.Start();
