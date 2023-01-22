@@ -88,7 +88,7 @@ namespace @SearchEngine
                         output.ToString().Show(ConsoleColor.DarkYellow);
                         break;
                     case 8:
-                        output = LargestCompleteBook(Get.Int(new Range(1), "Number of Common Words: ", ConsoleColor.DarkCyan), out List<int> book);
+                        output = LargestCompleteBook(Get.Int(new Range(1), "Number of Common Words: ", ConsoleColor.DarkCyan), new Range(200, 300), out List<int> book);
                         "Pages: ".Show(ConsoleColor.DarkBlue);
                         book.Show(ConsoleColor.DarkYellow);
                         "Total Number of Pages: ".Show(ConsoleColor.DarkBlue, false);
@@ -523,7 +523,7 @@ namespace @SearchEngine
         }
 
         //Part_8
-        private static int LargestCompleteBook(int repetitionsNum, out List<int> largestBook)
+        private static int LargestCompleteBook(int repetitionsNum, Range range, out List<int> largestBook)
         {
             watch.Start();
             allocated = Process.GetCurrentProcess().PrivateMemorySize64;
@@ -531,7 +531,7 @@ namespace @SearchEngine
             largestBook = new List<int>();
             foreach (string genre in genres.Keys)
             {
-                BooksWithGenre(genre, repetitionsNum, new Range(200, 300), out List<List<int>> books, out bool[,] adjacencyMatrix);
+                BooksWithGenre(genre, repetitionsNum, range, out List<List<int>> books, out bool[,] adjacencyMatrix);
 
                 for (int book = 0; book < books.Count; book++)
                 {
@@ -540,7 +540,7 @@ namespace @SearchEngine
                     {
                         for (int j = i + 1; j < books[book].Count && areAdjacent; j++)
                         {
-                            if (!adjacencyMatrix[i, j] && !adjacencyMatrix[j, i])
+                            if (!adjacencyMatrix[books[book][i] - range.min, books[book][j] - range.min] && !adjacencyMatrix[books[book][j] - range.min, books[book][i] - range.min])
                             {
                                 areAdjacent = false;
                             }
